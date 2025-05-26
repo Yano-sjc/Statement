@@ -1,0 +1,158 @@
+extends layout
+
+block content
+  script(src="/javascripts/saveData.js")
+  script(src="/javascripts/changeMonth.js")
+  title= title
+
+  body
+    h1.genre-summary-title= title
+
+  div#calendar-meta(data-year=year data-month=month)
+    button.change_button(onclick="changeMonth('prev')")
+      svg(width="30" height="30" viewBox="0 0 24 24")
+        path(d="M15 18l-6-6 6-6")
+      | #{month === 1 ? 12:(month -1)}月
+    h2.year_month(onclick="showYearSelector()") #{year}年
+    h2.year_month(onclick="showMonthSelector()") #{month}月
+    div#year_selector.modal-select(style="display: none;")
+      div.modal-content-select
+        span.close(onclick="closeYearSelectorModal()") ×
+        h2 年を選択
+        div.year-list
+          each year in years  
+              button.year-item-select(onclick=`SelectedMonthmodal(${year},${month})`)= year
+    div#month_selector.modal-select(style="display: none;")
+      div.modal-content-select
+        span.close(onclick="closeMonthSelectorModal()") ×
+        h2 月を選択
+        div.month-list
+          each month in months  
+              button.month-item-select(onclick=`SelectedMonthmodal(${year},${month})`)= month
+      //- select#month-selector
+      //-   each month in months
+      //-     option(value=month)= month
+      
+
+    button.change_button2(onclick="changeMonth('next')")
+      | #{month === 12 ? 1 : (month +1)}月
+      svg(width="30" height="30" viewBox="0 0 24 24")
+        path(d="M9 6l6 6-6 6")
+
+  p.year_and_month 合計収支: #{monthTotal} 円
+
+
+  div.button-group
+    div
+      button.change_year_button(onclick="openYearModal()") 年別収支
+  
+      div#year-modal.modal(style="display:none;")
+        div.modal-content
+          span.close(onclick="closeYearModal()") ×
+          h2#year-modal-title 年別収支
+          div#year-data-info
+            p#year-record-info ロード中...
+  
+    div
+      button.genre_button(onclick="openGenreModel()") ジャンル別収支
+  
+      div#genre-modal.modal(style="display:none;")
+        div.modal-content
+          span.close(onclick="closeGenreModal()") ×
+          h2#genre-modal-title ジャンル別収支
+          div#genre-data-info
+            p#genre-record-info ロード中...
+    //- 月別モーダル
+  div#month-modal.modal(style="display:none;")
+    div.modal-content
+      span.close(onclick="closeMonth()") ×
+      h2#month-modal-title 月別収支
+      div#month-data-info
+        p#month-record-info ロード中...
+  //- 日別モーダル
+  div#day-modal.modal(style="display:none;")
+    div.modal-content
+      span.close(onclick="closeDay()") ×
+      h2#day-modal-title 日別収支
+      div#day-data-info
+        p#day-record-info ロード中...
+  table
+    thead
+      tr
+        th.holiday2 日
+        th.weekday 月
+        th.weekday 火
+        th.weekday 水
+        th.weekday 木
+        th.weekday 金
+        th.holiday2 土
+    tbody
+      if calenderData
+        each week in calenderData
+          tr
+            - let today = new Date();
+            - let isSameYearMonth = (year === today.getFullYear() && month === (today.getMonth() + 1));
+
+            each day in week
+              if day
+                - let dateString = year + '-' + String(month).padStart(2, '0') + '-' + String(day.date).padStart(2, '0')
+                - let jsDate = new Date(year, month - 1, day.date)
+                - let isWeekend = jsDate.getDay() === 0 || jsDate.getDay() === 6
+                - let isToday = isSameYearMonth && (day.date === today.getDate())
+                td(
+                  class=`${isToday ? 'today' : ''} ${holidays[dateString] || isWeekend ? 'holiday' : ''} ${day.total !== null ? (day.total >= 0 ? 'positive-day' : 'negative-day') : ''}`,
+                  data-date=dateString,
+                  onclick=`openModal('${dateString}')`,
+                  style="cursor: pointer;"
+                )
+                  | #{day.date}
+                  if day.total !== null
+                    div.total-display(
+                      class=(day.total >= 0 ? 'positive' : 'negative')
+                    ) #{day.total} 円
+              else
+                td
+      else 
+        p カレンダーデータがありません
+
+  div#modal.modal(style="display:none;")
+    div.modal-content
+      span.close(onclick="closeModal()") ×
+      //- 日付表示
+      h2#modal-date
+      div#record-info
+      
+      form#edit-form(action="/calender/save" method="POST")
+        input(type="hidden" name="date_of_gambling" id="date_of_gambling")
+        label 
+          strong ギャンブル名
+        br
+        select(name="gambling_name")
+          option(value="" selected disabled) --選択してください--
+          each name in gamblingNames
+            option(value=name)= name
+        br
+        label 
+          strong  投資額
+        div.input-group
+          input#investment(type="number" name="investment" value="0" step="100")
+          button(type="button" onclick="adjustValue('investment', -100)") ━ 
+          button(type="button" onclick="adjustValue('investment', 100)") ✙
+          br
+          input(type="range" min="0" max="100000" step="1000" value="0" oninput="syncValue('investment', this.value)")
+        br
+        label 
+          strong 回収額
+        div.input-group
+          input#recovery(type="number" name="recovery" value="0" step="100")
+          button(type="button" onclick="adjustValue('recovery', -100)") ━
+          button(type="button" onclick="adjustValue('recovery', 100)") ✙
+          br
+          input(type="range" min="0" max="100000" step="1000" value="0" oninput="syncValue('recovery', this.value)")
+
+        br
+        label 
+          strong メモ
+        input(type="text" name="memo")
+        br
+        button(type="button" onclick="saveData()") 保存
