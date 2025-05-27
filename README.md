@@ -47,7 +47,7 @@ npm install
 ### 3. アプリ起動
 
 ```bash
-SET DEBUG=locallibrary:* & npm run devstart
+npm run devstart
 ```
 
 ### 4. アクセス方法
