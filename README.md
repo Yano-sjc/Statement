@@ -32,20 +32,25 @@
 
 ## セットアップ方法
 
+### 1. リポジトリのクローン
 
-### 1. パッケージのインストール
+```bash
+git clone git@github.com:Yano-sjc/Statement.git
+
+```
+### 2. パッケージのインストール
 
 ```bash
 npm install
 ```
 
-### 2. アプリ起動
+### 3. アプリ起動
 
 ```bash
 SET DEBUG=locallibrary:* & npm run devstart
 ```
 
-### 3. アクセス方法
+### 4. アクセス方法
 
 - カレンダー画面： http://localhost:3000/calender
 
