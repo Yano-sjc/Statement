@@ -53,7 +53,7 @@ router.get('/', async (req, res) => {
         }
       });
     });
-
+    //カレンダーに情報を渡す
     res.render('calender', {
       title: 'ギャンブル収支表',
       calenderData: calenderData,
