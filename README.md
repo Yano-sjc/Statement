@@ -35,7 +35,7 @@
 ### 1. リポジトリのクローン
 
 ```bash
-git clone git@github.com:Yano-sjc/Statement.git
+git@github.com:Yano-sjc/Statement.git
 
 ```
 ### 2. パッケージのインストール
